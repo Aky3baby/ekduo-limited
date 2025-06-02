@@ -142,3 +142,15 @@
         });
 
 
+  document.addEventListener('DOMContentLoaded', function() {
+    const toggle = document.getElementById('mobileToggle');
+    const navMenu = document.getElementById('navMenu');
+
+    toggle.addEventListener('click', function() {
+      navMenu.classList.toggle('active');
+    });
+  });
+
+
+
+  
