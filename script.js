@@ -153,4 +153,238 @@
 
 
 
+
+
+
+// Contact Form Submission with Formspree
+
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('contactForm');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    if (!form || !submitBtn) return;
+
+    // Form submission handler
+    form.addEventListener('submit', function(event) {
+        event.preventDefault();
+        
+        // Add loading state
+        submitBtn.classList.add('loading');
+        submitBtn.disabled = true;
+        
+        // Get form data
+        const formData = new FormData(form);
+        
+        // Submit to Formspree
+        fetch('https://formspree.io/f/xwplyovp', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                showSuccessMessage();
+                form.reset();
+            } else {
+                throw new Error('Network response was not ok');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showErrorMessage();
+        })
+        .finally(() => {
+            // Remove loading state
+            submitBtn.classList.remove('loading');
+            submitBtn.disabled = false;
+        });
+    });
+    
+    // Success message
+    function showSuccessMessage() {
+        const message = document.createElement('div');
+        message.innerHTML = `
+            <div style="
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #10b981, #059669);
+                color: white;
+                padding: 16px 24px;
+                border-radius: 8px;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+                z-index: 1000;
+                animation: slideInFromRight 0.3s ease-out;
+            ">
+                <div style="display: flex; align-items: center;">
+                    <i class="fas fa-check-circle" style="margin-right: 8px;"></i>
+                    <span>Message sent successfully! We'll respond within 24 hours.</span>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(message);
+        
+        // Remove message after 5 seconds
+        setTimeout(() => {
+            message.remove();
+        }, 5000);
+    }
+    
+    // Error message
+    function showErrorMessage() {
+        const message = document.createElement('div');
+        message.innerHTML = `
+            <div style="
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #ef4444, #dc2626);
+                color: white;
+                padding: 16px 24px;
+                border-radius: 8px;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+                z-index: 1000;
+                animation: slideInFromRight 0.3s ease-out;
+            ">
+                <div style="display: flex; align-items: center;">
+                    <i class="fas fa-exclamation-triangle" style="margin-right: 8px;"></i>
+                    <span>Failed to send message. Please try again.</span>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(message);
+        
+        // Remove message after 5 seconds
+        setTimeout(() => {
+            message.remove();
+        }, 5000);
+    }
+    
+    // Add animation for toast messages
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideInFromRight {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // Form validation enhancements
+    const inputs = form.querySelectorAll('input, select, textarea');
+    
+    inputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            validateField(this);
+        });
+        
+        input.addEventListener('input', function() {
+            clearFieldError(this);
+        });
+    });
+    
+    function validateField(field) {
+        const value = field.value.trim();
+        
+        // Remove any existing error
+        clearFieldError(field);
+        
+        if (field.hasAttribute('required') && !value) {
+            showFieldError(field, 'This field is required');
+            return false;
+        }
+        
+        if (field.type === 'email' && value) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(value)) {
+                showFieldError(field, 'Please enter a valid email address');
+                return false;
+            }
+        }
+        
+        if (field.type === 'tel' && value) {
+            const phoneRegex = /^[\+]?[\d\s\-\(\)]+$/;
+            if (!phoneRegex.test(value)) {
+                showFieldError(field, 'Please enter a valid phone number');
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    function showFieldError(field, message) {
+        field.style.borderColor = '#ef4444';
+        
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'field-error';
+        errorDiv.style.color = '#ef4444';
+        errorDiv.style.fontSize = '14px';
+        errorDiv.style.marginTop = '4px';
+        errorDiv.textContent = message;
+        
+        field.parentNode.appendChild(errorDiv);
+    }
+    
+    function clearFieldError(field) {
+        field.style.borderColor = '';
+        const errorDiv = field.parentNode.querySelector('.field-error');
+        if (errorDiv) {
+            errorDiv.remove();
+        }
+    }
+    
+    // Enhance form submission with validation
+    const originalSubmitHandler = form.onsubmit;
+    form.addEventListener('submit', function(event) {
+        let isValid = true;
+        
+        inputs.forEach(input => {
+            if (!validateField(input)) {
+                isValid = false;
+            }
+        });
+        
+        if (!isValid) {
+            event.preventDefault();
+            return false;
+        }
+    });
+});
+
   
+
+
+
+
+
+
+   // Mobile Menu Toggle
+        const hamburger = document.querySelector('.hamburger');
+        const mobileMenu = document.querySelector('.mobile-menu');
+        const overlay = document.querySelector('.overlay');
+        
+        hamburger.addEventListener('click', () => {
+            hamburger.classList.toggle('active');
+            mobileMenu.classList.toggle('active');
+            overlay.classList.toggle('active');
+        });
+        
+        overlay.addEventListener('click', () => {
+            hamburger.classList.remove('active');
+            mobileMenu.classList.remove('active');
+            overlay.classList.remove('active');
+        });
+        
