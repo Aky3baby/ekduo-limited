@@ -24,22 +24,117 @@ navLinks.forEach(link => {
     });
 });
 
-// Smooth Scrolling
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        const targetId = this.getAttribute('href');
-        if(targetId === '#') return;
-        
-        const targetElement = document.querySelector(targetId);
-        if (targetElement) {
-            window.scrollTo({
-                top: targetElement.offsetTop - 100,
-                behavior: 'smooth'
+  // Smooth scrolling for all anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                // Skip for links that don't have a target
+                if (this.getAttribute('href') === '#') return;
+                
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                
+                if (targetElement) {
+                    // Calculate position, offset by 20px for spacing
+                    const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset - 20;
+                    
+                    // Smooth scroll to target
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: 'smooth'
+                    });
+                    
+                    // Add highlight animation
+                    targetElement.classList.add('highlight');
+                    setTimeout(() => {
+                        targetElement.classList.remove('highlight');
+                    }, 1500);
+                }
             });
-        }
-    });
-});
+        });
+        
+        // Highlight target when page loads with hash
+        window.addEventListener('load', function() {
+            if (window.location.hash) {
+                const targetElement = document.querySelector(window.location.hash);
+                if (targetElement) {
+                    setTimeout(() => {
+                        targetElement.classList.add('highlight');
+                        setTimeout(() => {
+                            targetElement.classList.remove('highlight');
+                        }, 1500);
+                    }, 500);
+                }
+            }
+        });
+
+
+        // Fixed animation for stats - now handles percentages and plus signs
+        document.addEventListener('DOMContentLoaded', function() {
+            const statsSection = document.querySelector('.stats-section');
+            const statNumbers = document.querySelectorAll('.stat-number');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        statNumbers.forEach(stat => {
+                            const originalText = stat.innerText;
+                            // Extract the numeric value (remove % and +)
+                            let target = parseFloat(originalText.replace(/[^0-9.]/g, ''));
+                            
+                            // If we have a percentage sign, we'll need to add it back later
+                            const isPercentage = originalText.includes('%');
+                            const hasPlus = originalText.includes('+');
+                            
+                            // If we couldn't parse a number, skip this stat
+                            if (isNaN(target)) return;
+                            
+                            let count = 0;
+                            const increment = target / 30;
+                            
+                            const updateCount = () => {
+                                if (count < target) {
+                                    let displayValue = Math.ceil(count);
+                                    // Add back the symbols as needed
+                                    if (isPercentage) displayValue += '%';
+                                    if (hasPlus) displayValue += '+';
+                                    stat.innerText = displayValue;
+                                    count += increment;
+                                    setTimeout(updateCount, 50);
+                                } else {
+                                    // Final value with symbols
+                                    let displayValue = target;
+                                    if (isPercentage) displayValue += '%';
+                                    if (hasPlus) displayValue += '+';
+                                    stat.innerText = displayValue;
+                                }
+                            };
+                            
+                            updateCount();
+                        });
+                        
+                        // Stop observing after animation
+                        observer.unobserve(statsSection);
+                    }
+                });
+            }, { threshold: 0.5 });
+            
+            observer.observe(statsSection);
+        });
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Gallery Functionality
 const galleryItems = document.querySelectorAll('.gallery-item');
